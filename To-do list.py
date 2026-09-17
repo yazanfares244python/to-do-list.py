@@ -558,6 +558,7 @@ class ToDoListData:
         # Check if file exists
         if Path("to_do_list.json").is_file():
             with open("to_do_list.json", "r") as f:
+                # Loading the data before converting the strings into date and time objects
                 self.to_do_list = json.load(f)
                 # Looping through each task information
                 for task_info in self.to_do_list:
@@ -580,5 +581,6 @@ class ToDoListData:
                         task_info[task_info_key] = time.isoformat(task_info_value)
                     else:
                         continue
+            # Saving the data after the date and time objects are converted into strings to avoid TypeError's
             json.dump(self.to_do_list, f)
 to_do_list = ToDoListCLI().display_menu()   
