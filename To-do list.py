@@ -1,586 +1,319 @@
-# Important modules
-from pathlib import Path
-from datetime import datetime, date, time
 import json
-# Unimportant module
+from datetime import datetime
 from time import sleep
-# Creating the class that is responsible for the main critical points about the to-do list(adding, viewing, deleting, etc.)
+# The class that is responsible for the to-do list operations such as adding, viewing, deleting, etc.
 class ToDoList:
-    # Initializing each variable thats gonna be used in this class
+    # Initialized variables that will be used in this class
     def __init__(self):
-        self.weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.to_do_list = []
-        self.task_info = {}
-        self.task = None
-        self.category = None
-        self.priority = None
-        self.year = 0
-        self.month = 0
-        self.day = 0
-        self.hour = 0
-        self.minute = 0
-        self.date = None
-        # This variable is from the ToDoListCLI class
-        self.option = None
-    # Creating the function that adds a new task
-    def add_new_task(self):
-        # Asking for the task while checking if its valid or not
-        while True:
-            self.task = input("Enter the task that you want to add into the to-do list ->: ").capitalize()
-            if not self.task:
-                print("Enter a valid task")
-            else:
-                break
-        # Asking for the category while checking if its valid or not
-        while True:
-            self.category = input(f"Enter the category of {self.task}(School, Programming, Sports, etc.) ->: ").capitalize()
-            if not self.category:
-                print("Enter a valid category")
-            else:
-                break
-        # Asking for the priority while checking if its valid or not
-        while True:
-            self.priority = input(f"Enter the priority of {self.task}(High/Medium/Low) ->: ").capitalize().strip()
-            if self.priority not in ("High", "Medium", "Low"):
-                print("Enter a valid priority")
-            else:
-                break
-        # Asking for the year, month and day for the due date and the hour and minute for the due time
-        while True:
-            try:
-                self.year = int(input("Enter the year ->: "))
-                self.month = int(input("Enter the month ->: "))
-                self.day = int(input("Enter the day ->: "))
-                self.hour = int(input("Enter the hour ->: "))
-                self.minute = int(input("Enter the minute ->: "))
-                self.date = datetime(self.year, self.month, self.day, self.hour, self.minute)
-                # Checking if the date is older than the current date
-                if datetime.now() > self.date:
-                    print(f"Enter a date that isn't in the past(Today's date: {datetime.now()})")
-                else:
-                    break
-            except ValueError:
-                print("Invalid parameters therefore we will start over")
-        self.task_info = {"Task": self.task, "Category": self.category, "Priority": self.priority, "Due Date": self.date.date(), "Due Time": self.date.time(), "Due Weekday": self.weekdays[self.date.weekday()], "Done": 'Pending...'}
-        if self.task_info in self.to_do_list:
-            print("\nTask information already found")
-        else:
-            self.to_do_list.append(self.task_info)
-            print(f"\nThe task {self.task} has been added into the to-do list alongside it's information")
-    # Creating the function that displays all of the tasks
-    def display_tasks(self):
-        print("\nTo-Do list: ")
-        # Check if to-do list data exists
+        self.weekdays= {
+                    1: "Monday",
+                    2: "Tuesday",
+                    3: "Wednesday",
+                    4: "Thursday",
+                    5: "Friday",
+                    6: "Saturday",
+                    7: "Sunday"
+        }
+    # The function that adds a new task into the to-do list
+    def add_task(self, function):
+        task = function("Task", "task")
+        category = function("Category", f"category of {task}")
+        priority = function("Priority", f"priority of {task}(High/Medium/Low)")
+        deadline = function("Deadline", f"deadline of {task} in this format -> YYYY-MM-DD HH:MM(The hour and minute part is optional.)")
+        print(f"\nThe task {task} has been added into the to-do list.(ID: {len(self.to_do_list)+1})")
+        self.to_do_list.append({"ID": len(self.to_do_list)+1, "Task": task, "Category": category, "Priority": priority, "Deadline": deadline, "Weekday": self.weekdays[deadline.isoweekday()], "Done": "Pending..."})
+    # The function that displays the tasks
+    def display_tasks(self, parameter=None, parameter_value=None, option=None):
         if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Looping through each task information
+            print("\nNo data found.")
+            return
+        if parameter == None:
+            print("\nTo-Do List: \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
             for task_info in self.to_do_list:
-                print() # <- this is to separate each task information for clearer structure
-                for task_info_key, task_info_value in task_info.items():
-                    print(f"{task_info_key} -> {task_info_value}")
-    # Creating the function that deletes a task from the to-do list
-    def delete_task(self):
-        # Asking for the task while checking if its valid or not
-        while True:
-            self.task = input("Enter the task that you want to delete ->: ").capitalize()
-            if not self.task:
-                print("Enter a valid task")
-            else:
-                break
-        # Asking for the category while checking if its valid or not
-        while True:
-            self.category = input(f"Enter the category of {self.task}(School, Programming, Sports, etc.) ->: ").capitalize()
-            if not self.category:
-                print("Enter a valid category")
-            else:
-                break
-        # Asking for the priority while checking if its valid or not
-        while True:
-            self.priority = input(f"Enter the priority of {self.task}(High/Medium/Low) ->: ").capitalize().strip()
-            if self.priority not in ("High", "Medium", "Low"):
-                print("Enter a valid priority")
-            else:
-                break
-        # Asking for the due date while checking if its valid or not
-        while True:
-            try:
-                self.year = int(input("Enter the year ->: "))
-                self.month = int(input("Enter the month ->: "))
-                self.day = int(input("Enter the day ->: "))
-                self.hour = int(input("Enter the hour ->: "))
-                self.minute = int(input("Enter the minute ->: "))
-                self.date = datetime(self.year, self.month, self.day, self.hour, self.minute)
-                break
-            except ValueError:
-                print("Invalid parameters therefore we will start over")
-        # Checking if the task information is found or not
-        if not any(self.task == task_info["Task"] and self.category == task_info["Category"] and self.priority == task_info["Priority"] and self.date.date() == task_info["Due Date"] and self.date.time() == task_info["Due Time"] for task_info in self.to_do_list):
-            print("\nNo such task information found")
-        else:
-            # Looping through each task information
+                print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+        if callable(parameter_value):
+            variable = parameter_value(parameter, f"{parameter} to display the tasks")
+            if not [task_info for task_info in self.to_do_list if task_info[parameter] == variable]:
+                print("\nNo data found.")
+                return
+            print(f"\nTo-Do List({parameter} -> {variable}): \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
             for task_info in self.to_do_list:
-                if task_info["Task"] == self.task and task_info["Category"] == self.category and task_info["Priority"] ==  self.priority and task_info["Due Date"] == self.date.date() and task_info["Due Time"] == self.date.time():
-                    self.to_do_list.remove(task_info)
-                    print(f"\nThe task {self.task} has been deleted alongside it's information")
-                    break
-                else:
-                    continue
-    # Creating the function that clears all tasks from the to-do list
-    def clear_all_tasks(self):
-        # Check if to-do list exists
+                if task_info[parameter] == variable:
+                    print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+        if option == "10":
+            if not [task_info for task_info in self.to_do_list if task_info[parameter] == parameter_value]:
+                print("\nNo data found.")
+                return
+            print(f"\nTo-Do List(Pending): \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
+            for task_info in self.to_do_list:
+                if task_info[parameter] == parameter_value:
+                    print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+        elif option == '11':
+            if not [task_info for task_info in self.to_do_list if parameter_value in task_info[parameter]]:
+                print("\nNo data found.")
+                return
+            print(f"\nTo-Do List(Complete): \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
+            for task_info in self.to_do_list:
+                if parameter_value in task_info[parameter]:
+                    print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+        elif option == '12':    
+            if not [task_info for task_info in self.to_do_list if task_info[parameter].date() == datetime.now().date()]:
+                print("\nNo data found.")
+                return
+            print(f"\nTo-Do List({datetime.now().date()}): \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
+            for task_info in self.to_do_list:
+                if task_info["Deadline"].date() == datetime.now().date():
+                    print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+        elif option == '13':
+            if not [task_info for task_info in self.to_do_list if task_info[parameter] < datetime.now()]:
+                print("\nNo data found to proceed.")
+                return
+            print(f"\nTo-Do List(Before {datetime.now()}): \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
+            for task_info in self.to_do_list:
+                if task_info["Deadline"] < datetime.now():
+                    print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+        elif option == '14':
+            if not [task_info for task_info in self.to_do_list if task_info["Deadline"] > datetime.now()]:
+                print("\nNo data found to proceed.")
+                return
+            print(f"\nTo-Do List(After {datetime.now()}): \n")
+            print("ID  |  Task  |  Category  |  Priority  |   Deadline    |  Weekday  |  Done  ")
+            for task_info in self.to_do_list:
+                if task_info["Deadline"] > datetime.now():
+                    print(f"{task_info['ID']})   {task_info['Task']}    {task_info['Category']}       {task_info['Priority']}     {task_info['Deadline']}   {task_info['Weekday']}  {task_info['Done']}")
+    # The function that deletes a task
+    def delete_task(self, function):
         if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
+            print("\nNo data found to proceed.")
+            return
+        self.display_tasks()
+        task_id = function(self.to_do_list)
+        for task_info in self.to_do_list:
+            if task_info["ID"] == task_id:
+                self.to_do_list.remove(task_info)
+                print(f"\nThe task with the task ID {task_id} has been deleted.")
+                self.reload_ids()
+                break
+    # The function thar clears the entire to-do list
+    def clear_tasks(self, function):
+        if not self.to_do_list:
+            print("\nNo data found to proceed.")
+            return
+        if function() == 'y':
             self.to_do_list.clear()
-            print("\nThe to-do list has been cleared")
-    # Creating the function that edit's an task's attribute(Name/Category/Priority/Due Date/Due Time)
-    def edit_task_attribute(self):
-        # Asking for the task while checking if its valid or not
-        while True:
-            self.task = input("Enter the task whose attribute you would like to edit ->: ").capitalize()
-            if not self.task:
-                print("Enter a valid task")
-            else:
+            print("\nThe to-do list has been cleared.")
+            return
+        print("\nOk we will proceed as usual.")
+    # The function that can edit a task
+    def edit_task(self, function, function2, function3):
+        if not self.to_do_list:
+            print("\nNo data found to proceed.")
+            return
+        category = function()
+        self.display_tasks()
+        task_id = function2(self.to_do_list)
+        for task_info in self.to_do_list:
+            if task_info["ID"] != task_id:
+                continue
+            initial_value = task_info[category]
+            final_value = function3(category, f"new version of the {category.lower()} for the task with the task ID {task_id}")
+            if initial_value == final_value:
+                print(f"\nThe {category.lower()} of the task with the task ID {task_id} is already the same.")
                 break
-        # Asking for the category while checking if its valid or not
-        while True:
-            self.category = input(f"Enter the category of {self.task}(School, Programming, Sports, etc.) ->: ").capitalize()
-            if not self.category:
-                print("Enter a valid category")
-            else:
+            task_info[category] = final_value
+            if category == "Deadline":
+                task_info["Weekday"] = self.weekdays[final_value.isoweekday()]
+            print(f"\nThe task with the task ID {task_id} has had it's {category.lower()} edited.")
+            break
+    # The function that marks a task as done
+    def mark_task(self, function):
+        if not self.to_do_list:
+            print("\nNo data found to proceed.")
+            return
+        self.display_tasks()
+        task_id = function(self.to_do_list)
+        for task_info in self.to_do_list:
+            if task_info["ID"] != task_id:
+                continue
+            if "Complete" in task_info['Done']:
+                print("\nThe task is already marked as done.")
                 break
-        # Asking for the priority while checking if its valid or not
-        while True:
-            self.priority = input(f"Enter the priority of {self.task}(High/Medium/Low) ->: ").capitalize().strip()
-            if self.priority not in ("High", "Medium", "Low"):
-                print("Enter a valid priority")
-            else:
+            print(f"\nThe task with the ID {task_id} has been marked as done.")
+            if task_info["Deadline"] < datetime.now():
+                task_info["Done"] = "Complete(OVERDUE)"
                 break
-        # Asking for the due date while checking if its valid or not
+            task_info["Done"] = "Complete"
+            break
+    # The function that unmarks a task
+    def unmark_task(self, function):
+        if not self.to_do_list:
+            print("\nNo data found to proceed.")
+            return
+        self.display_tasks()
+        task_id = function(self.to_do_list)
+        for task_info in self.to_do_list:
+            if task_info["ID"] != task_id:
+                continue
+            if task_info["Done"] == "Pending...":
+                print("\nThe task is already not marked.")
+                break
+            task_info["Done"] = "Pending..."
+            print(f"\nThe task with the ID {task_id} has been unmarked.")
+            break
+    # The function that reloads the ID's after deleting
+    def reload_ids(self):
+        for index, task_info in enumerate(self.to_do_list, start=1):
+            task_info["ID"] = index
+# The class that is responsible for the CLI commands which are mostly user inputs
+class ToDoListCLI:
+    # Initialized attributes that will be used in this class 
+    def __init__(self):
+        self.to_do = ToDoList()
+        self.data = ToDoListJSON()
+    # The function that asks the user for an input while handling edge cases
+    def user_input(self, parameter: str, text: str):
+        categories = {
+            "Task": None,
+            "Category": None,
+            "Priority": ("High", "Medium", "Low"),
+            "Deadline": datetime.fromisoformat
+        }
+        while True:
+            if callable(categories[parameter]):
+                try:
+                    variable = categories[parameter](input(f"Enter the {text} ->: "))
+                    if variable.date() >= datetime.now().date():
+                        return variable
+                    print(f"Enter a deadline that doesn't have a date that is before than {datetime.now().date()}.")
+                except ValueError as e:
+                    print(f"\n{e}\n")
+            elif categories[parameter] == None:
+                variable = input(f"Enter the {text} ->: ").capitalize().strip()
+                if variable:
+                    return variable
+                print("Enter a valid input.")
+            else:
+                variable = input(f"Enter the {text} ->: ").capitalize().strip()
+                if variable in categories[parameter]:
+                    return variable
+                print("Invalid priority.(Options: High/Medium/Low)")
+    # The function that asks for an ID input
+    def id_input(self, storage: list) -> int:
         while True:
             try:
-                self.year = int(input("Enter the year ->: "))
-                self.month = int(input("Enter the month ->: "))
-                self.day = int(input("Enter the day ->: "))
-                self.hour = int(input("Enter the hour ->: "))
-                self.minute = int(input("Enter the minute ->: "))
-                self.date = datetime(self.year, self.month, self.day, self.hour, self.minute)
-                break
+                id_input = int(input("Enter the ID ->: "))
+                if 0 < id_input <= len(storage):
+                    return id_input
+                print("Enter a valid ID.")
             except ValueError:
-                print("Invalid parameters therefore we will start over")
-        # Check if the task information exists
-        if not any(self.task == task_info["Task"] and self.category == task_info["Category"] and self.priority == task_info["Priority"] and self.date.date() == task_info["Due Date"] and self.date.time() == task_info["Due Time"] for task_info in self.to_do_list):
-            print("\nNo such task information found")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Task"] == self.task and task_info["Category"] == self.category and task_info["Priority"] == self.priority and task_info["Due Date"] == self.date.date() and task_info["Due Time"] == self.date.time():
-                    self.option = input(f"Enter the attribute of {self.task} that you would like to edit(Enter N for Name, C for Category, P for Priority, DD for Due Date, DT for Due Time) ->: ").upper().strip()
-                    if self.option == 'N':
-                        # Asking for the task while checking if its valid or not
-                        while True:
-                            self.task = input(f"Enter the new version of {task_info['Task']} ->: ").capitalize()
-                            if not self.task:
-                                print("Enter a valid task")
-                            elif task_info["Task"] == self.task:
-                                print("\nThe task name is already the same")
-                                break
-                            else:
-                                print(f"\nThe task {task_info['Task']} has been edited to {self.task}")
-                                task_info["Task"] = self.task
-                                break
-                    elif self.option == 'C':
-                        # Asking for the category while checking if its valid or not
-                        while True:
-                            self.category = input(f"Enter the category of {self.task}(School, Programming, Sports, etc.) ->: ").capitalize()
-                            if not self.category:
-                                print("Enter a valid category")
-                            elif task_info["Category"] == self.category:
-                                print("\nThe task category is already the same")
-                                break
-                            else:
-                                print(f"\nThe task {self.task}'s category {task_info['Category']} has been edited to {self.category}")
-                                task_info['Category'] = self.category
-                                break
-                    elif self.option == 'P':
-                        # Asking for the priority while checking if its valid or not
-                        while True:
-                            self.priority = input(f"Enter the priority of {self.task}(High/Medium/Low) ->: ").capitalize().strip()
-                            if self.priority not in ("High", "Medium", "Low"):
-                                print("Enter a valid priority")
-                            elif task_info["Priority"] == self.priority:
-                                print("\nThe task priority is already the same")
-                                break
-                            else:
-                                print(f"\nThe task {self.task}'s priority {task_info['Priority']} has been edited to {self.priority}")
-                                task_info["Priority"] = self.priority
-                                break
-                    elif self.option == 'DD':
-                        # Asking for the year, month and day while checking if its valid or not
-                        while True:
-                            try:
-                                self.year = int(input("Enter the year ->: "))
-                                self.month = int(input('Enter the month ->: '))
-                                self.day = int(input('Enter the day ->: '))
-                                self.date = date(self.year, self.month, self.day)
-                                # Check if the date input is the same as the due date that exists
-                                if task_info["Due Date"] == self.date:
-                                    print("\nThe task's due date is already the same")
-                                else:
-                                    print(f"\nThe task {self.task}'s due date {task_info['Due Date']} has been edited to {self.date} including the weekday")
-                                    task_info["Due Date"] = self.date
-                                    task_info["Due Weekday"] = self.weekdays[self.date.weekday()]
-                                break
-                            except ValueError:
-                                print("Invalid parameters therefore we will start over")
-                    elif self.option == 'DT':
-                        # Asking for the hour and minute while checking if its valid or not
-                        while True:
-                            try:
-                                self.hour = int(input("Enter the hour ->: "))
-                                self.minute = int(input("Enter the minute ->: "))
-                                self.date = time(self.hour, self.minute)
-                                # Check if the time input is the same as the due time that exists
-                                if task_info['Due Time'] == self.date:
-                                    print("\nThe task due time is already the same")
-                                else:
-                                    print(f"\nThe task {self.task}'s due time {task_info['Due Time']} has been edited to {self.date}")
-                                    task_info["Due Time"] = self.date
-                                break
-                            except ValueError:
-                                print('Invalid parameters therefore we will start over')
-                    else:
-                        print("\nInvalid option")
-                    break
-    # Creating the function that marks a task as done
-    def mark_task(self):
-        # Asking for the task while checking if its valid or not
+                print("Invalid ID, pick again.")
+    # The function that checks whether the user actually wants to clear the to-do list or not
+    def clear_task_input(self) -> str:
         while True:
-            self.task = input("Enter the task that you want to mark as done ->: ").capitalize()
-            if not self.task:
-                print("Enter a valid task")
-            else:
-                break
-        # Asking for the category while checking if its valid or not
+            clear_task_input = input("Are you sure you want to clear the entire to-do list(y/n) ->: ").lower().strip()
+            if clear_task_input in ("y", "n"):
+                return clear_task_input
+            print("Enter a valid option.")
+    # The function that asks what attribute to edit
+    def edit_task_attribute_input(self):
         while True:
-            self.category = input(f"Enter the category of {self.task} ->: ").capitalize()
-            if not self.category:
-                print("Enter a valid category")
-            else:
-                break
-        # Asking for the priority while checking if its valid or not
+            attribute_input = input("Enter the attribute that you would like to edit(Task, Category, Priority, Deadline)->: ").capitalize().strip()
+            if attribute_input in ("Task", "Category", "Priority", "Deadline"):
+                return attribute_input
+            print("Enter a valid option.(Options: Task, Category, Priority, Deadline)")
+    # The function that displays the options
+    def display_options(self):
+        print("""
+1. Add a task\n2. View tasks\n3. Delete a task\n4. Clear all tasks\n5. Edit a task\n6. Mark a task as done\n7. Unmark a task\n8. View tasks according to a specific category\n9. View tasks according to a specific priority\n10. View tasks that are pending\n11. View tasks that are complete\n12. View tasks that are due today\n13. View tasks that are overdue\n14. View tasks for the future\n15. Exit
+""")
+    # The function that runs the entire program
+    def run_program(self):
+        print("--- TO-DO LIST ---")
+        self.to_do.to_do_list = self.data.read_file()
         while True:
-            self.priority = input(f"Enter the priority of {self.task}(High/Medium/Low) ->: ").capitalize().strip()
-            if self.priority not in ("High", "Medium", "Low"):
-                print("Enter a valid priority")
-            else:
-                break
-        # Asking for the due date while checking if its valid or not
-        while True:
-            try:
-                self.year = int(input("Enter the year ->: "))
-                self.month = int(input("Enter the month ->: "))
-                self.day = int(input("Enter the day ->: "))
-                self.hour = int(input("Enter the hour ->: "))
-                self.minute = int(input("Enter the minute ->: "))
-                self.date = datetime(self.year, self.month, self.day, self.hour, self.minute)
-                break
-            except ValueError:
-                print("Invalid parameters therefore we will start over")
-        # Check if the task information exists
-        if not any(self.task == task_info["Task"] and self.category == task_info["Category"] and self.priority == task_info['Priority'] and self.date.date() == task_info["Due Date"] and self.date.time() == task_info["Due Time"] for task_info in self.to_do_list):
-            print("\nNo such task information found")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Task"] == self.task and task_info["Category"] == self.category and task_info["Priority"] == self.priority and task_info["Due Date"] == self.date.date() and task_info["Due Time"] == self.date.time():
-                    if task_info["Done"] == "Pending...":
-                        # Checking if the task was marked late
-                        if datetime.now() > self.date:
-                            task_info["Done"] = "Complete(DONE LATE⚠️  )"
-                        else:
-                            task_info["Done"] = "Complete✅"
-                        print("\nThe task has been marked as complete")
-                    else:
-                        print("\nThe task already marked as complete")
-                    break
-                else:
-                    continue  
-    # Creating the function that unmarks a task as done
-    def unmark_task(self):
-        # Asking for the task while checking if its valid or not
-        while True:
-            self.task = input("Enter the task that you want to unmark as done ->: ").capitalize()
-            if not self.task:
-                print("Enter a valid task")
-            else:
-                break
-        # Asking for the category while checking if its valid or not
-        while True:
-            self.category = input(f"Enter the category of {self.task}(School, Programming, Sports, etc.) ->: ").capitalize()
-            if not self.category:
-                print("Enter a valid category")
-            else:
-                break
-        # Asking for the priority while checking if its valid or not
-        while True:
-            self.priority = input(f"Enter the priority of {self.task}(High/Medium/Low) ->: ").capitalize().strip()
-            if self.priority not in ("High", "Medium", "Low"):
-                print("Enter a valid priority")
-            else:
-                break
-        # Asking for the due date while checking if its valid or not
-        while True:
-            try:
-                self.year = int(input("Enter the year ->: "))
-                self.month = int(input("Enter the month ->: "))
-                self.day = int(input("Enter the day ->: "))
-                self.hour = int(input("Enter the hour ->: "))
-                self.minute = int(input("Enter the minute ->: "))
-                self.date = datetime(self.year, self.month, self.day, self.hour, self.minute)
-                break
-            except ValueError:
-                print("Invalid parameters therefore we will start over")
-        # Checking if the task information exists
-        if not any(self.task == task_info["Task"] and self.category == task_info["Category"] and self.priority == task_info["Priority"] and self.date.date() == task_info["Due Date"] and self.date.time() == task_info["Due Time"] for task_info in self.to_do_list):
-            print("\nNo such task information found")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Task"] == self.task and task_info["Category"] == self.category and task_info["Priority"] == self.priority and task_info["Due Date"] == self.date.date() and task_info["Due Time"] == self.date.time():
-                    if "Complete" in task_info["Done"]:
-                        task_info["Done"] = "Pending..."
-                        print("\nThe task has been unmarked as complete")
-                    else:
-                        print("\nThe task is already unmarked")
-                    break
-                else:
-                    continue
-    # Creating the function that displays tasks according to a specific category
-    def display_tasks_category(self):
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Asking for the category while checking if its valid or found
-            while True:
-                self.category = input("Enter the category to display the tasks ->: ").capitalize()
-                if not self.category:
-                    print("Enter a valid category")
-                elif all(self.category != task_info["Category"] for task_info in self.to_do_list):
-                    print("\nNo such category found")
-                    break
-                else:
-                    print(f"\nTo-Do List({self.category}): ")
-                    # Looping through each task information
-                    for task_info in self.to_do_list:
-                        if task_info["Category"] == self.category:
-                            print()
-                            # Looping through each key and value
-                            for task_info_key, task_info_value in task_info.items():
-                                print(f"{task_info_key} -> {task_info_value}")
-                        else:
-                            continue
-                    break
-    # Creating the function that displays tasks according to a specific priority
-    def display_tasks_priority(self):
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Asking for the priority while checking if its valid or not
-            while True:
-                self.priority = input("Enter the priority to display the tasks ->: ").capitalize().strip()
-                if self.priority not in ("High", "Medium", "Low"):
-                    print("Enter a valid priority")
-                else:
-                    print(f"\nTo-Do List(Priority: {self.priority}): ")
-                    # Looping through each task information 
-                    for task_info in self.to_do_list:
-                        if task_info["Priority"] == self.priority:
-                            print()
-                            # Looping through each key and value
-                            for task_info_key, task_info_value in task_info.items():
-                                print(f"{task_info_key} -> {task_info_value}")
-                        else:
-                            continue
-                    break
-    # Creating the function that displays tasks that are pending
-    def display_tasks_pending(self):
-        print("\nTo-Do List(Pending Tasks): ")
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Done"] == "Pending...":
-                    print()
-                    # Looping through each key and value
-                    for task_info_key, task_info_value in task_info.items():
-                        print(f"{task_info_key} -> {task_info_value}")
-                else:
-                    continue
-    # Creating the function that displays tasks that are done
-    def display_tasks_done(self):
-        print("\nTo-Do List(Done Tasks): ")
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if "Complete" in task_info["Done"]:
-                    print()
-                    # Looping through each key and value 
-                    for task_info_key, task_info_value in task_info.items():
-                        print(f"{task_info_key} -> {task_info_value}")
-                else:
-                    continue
-    # Creating the function that displays tasks that are for today
-    def display_tasks_today(self):
-        print("\nTo-Do List(Today): ")
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Due Date"] == datetime.now().date():
-                    print()
-                    # Looping through each key and value
-                    for task_info_key, task_info_value in task_info.items():
-                        print(f"{task_info_key} -> {task_info_value}")
-                else:
-                    continue
-    # Creating the function that displays tasks that are overdue(in the past)
-    def display_tasks_overdue(self):
-        print("\nTo-Do List(Overdue): ")
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Due Date"] < datetime.now().date() or (task_info["Due Date"] == datetime.now().date() and task_info["Due Time"]  < datetime.now().time()):
-                    print()
-                    # Looping through each key and value
-                    for task_info_key, task_info_value in task_info.items():
-                        print(f"{task_info_key} -> {task_info_value}")
-                else:
-                    continue
-    # Creating the function that displays the tasks that are in the future
-    def display_tasks_future(self):
-        print("\nTo-Do List(Future): ")
-        # Check if to-do list data exists
-        if not self.to_do_list:
-            print("\nNo data found to proceed")
-        else:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                if task_info["Due Date"] > datetime.now().date() or (task_info["Due Date"] == datetime.now().date() and task_info["Due Time"] > datetime.now().time()):
-                    print()
-                    # Looping through each key and value
-                    for task_info_key, task_info_value in task_info.items():
-                        print(f"{task_info_key} -> {task_info_value}")
-                else:
-                    continue
-# Creating the class that is responsible for the CLI commands while inheriting most of the variables from the ToDoList class to avoid AttributeError's
-class ToDoListCLI(ToDoList):
-    # Creating the function that asks the user what they want
-    def display_menu(self):
-        ToDoListData.read_data(self)
-        print("--- To-Do List ---")
-        while True:
-            print("\n1. Add a new task")
-            print("2. View all tasks")
-            print("3. Delete a task")
-            print("4. Clear all tasks")
-            print("5. Edit a task's attribute(Name/Category/Priority/Due Date/Due Time)")
-            print("6. Mark a task as done")
-            print("7. Unmark a task")
-            print("8. View tasks according to a specific category")
-            print("9. View tasks according to a specific priority")
-            print("10. View tasks that are pending")
-            print("11. View tasks that are done")
-            print("12. View today's tasks")
-            print("13. View overdue tasks")
-            print("14. View future tasks")
-            print("15. Exit")
-            self.option = input("Enter your option(1-15) ->: ")
-            if self.option == '1':
-                ToDoList.add_new_task(self)
-            elif self.option == '2':
-                ToDoList.display_tasks(self)
-            elif self.option == '3':
-                ToDoList.delete_task(self)
-            elif self.option == '4':
-                ToDoList.clear_all_tasks(self)
-            elif self.option == '5':
-                ToDoList.edit_task_attribute(self)
-            elif self.option == '6':
-                ToDoList.mark_task(self)
-            elif self.option == '7':
-                ToDoList.unmark_task(self)
-            elif self.option == '8':
-                ToDoList.display_tasks_category(self)
-            elif self.option == '9':
-                ToDoList.display_tasks_priority(self)
-            elif self.option == '10':
-                ToDoList.display_tasks_pending(self)
-            elif self.option == '11':
-                ToDoList.display_tasks_done(self)
-            elif self.option == '12':
-                ToDoList.display_tasks_today(self)
-            elif self.option == '13':
-                ToDoList.display_tasks_overdue(self)
-            elif self.option == '14':
-                ToDoList.display_tasks_future(self)
-            elif self.option == '15':
+            self.display_options()
+            option = input('Enter your option(1-15) ->: ').strip()
+            if option == '1':
+                self.to_do.add_task(self.user_input)
+            elif option == '2':
+                self.to_do.display_tasks()
+            elif option == '3':
+                self.to_do.delete_task(self.id_input)
+            elif option == '4':
+                self.to_do.clear_tasks(self.clear_task_input)
+            elif option == '5':
+                self.to_do.edit_task(self.edit_task_attribute_input, self.id_input, self.user_input)
+            elif option == '6':
+                self.to_do.mark_task(self.id_input)
+            elif option == '7':
+                self.to_do.unmark_task(self.id_input)
+            elif option == '8':
+                self.to_do.display_tasks("Category", self.user_input)
+            elif option == '9':
+                self.to_do.display_tasks("Priority", self.user_input)
+            elif option == '10':
+                self.to_do.display_tasks("Done", "Pending...", option)
+            elif option == '11':
+                self.to_do.display_tasks("Done", "Complete", option)
+            elif option in ('12', '13', '14'):
+                self.to_do.display_tasks("Deadline", None, option)
+            elif option == '15':
                 print("Ok wait a moment...")
                 sleep(1.5)
                 print("Saving data...")
-                ToDoListData.write_data(self)
+                self.data.write_file(self.to_do.to_do_list)
                 sleep(2)
                 print("Exiting...")
                 sleep(1.5)
                 break
             else:
-                print("\nInvalid option")
-# Creating the class that is responsible for the data saving
-class ToDoListData:
-    # Initializing one variable thats gonna be used in this class
-    def __init__(self):
-        self.to_do_list = []
-    # Creating the function that reads the data from the file and writes it into the program
-    def read_data(self):
-        # Check if file exists
-        if Path("to_do_list.json").is_file():
-            with open("to_do_list.json", "r") as f:
-                # Loading the data before converting the strings into date and time objects
-                self.to_do_list = json.load(f)
-                # Looping through each task information
-                for task_info in self.to_do_list:
-                    # Looping through the keys and values
-                    for task_info_key, task_info_value in task_info.items():
-                        if task_info_key == "Due Date":
-                            task_info[task_info_key] = date.fromisoformat(task_info_value)
-                        elif task_info_key == "Due Time":
-                            task_info[task_info_key] = time.fromisoformat(task_info_value)
-    # Creating the function that reads the data from the program and writes it into the file
-    def write_data(self):
-        with open("to_do_list.json", "w") as f:
-            # Looping through each task information
-            for task_info in self.to_do_list:
-                # Looping through the keys and values
-                for task_info_key, task_info_value in task_info.items():
-                    if task_info_key == "Due Date":
-                        task_info[task_info_key] = date.isoformat(task_info_value)
-                    elif task_info_key == 'Due Time':
-                        task_info[task_info_key] = time.isoformat(task_info_value)
-                    else:
-                        continue
-            # Saving the data after the date and time objects are converted into strings to avoid TypeError's
-            json.dump(self.to_do_list, f)
-to_do_list = ToDoListCLI().display_menu()   
+                print("\nInvalid option.\n")
+# The class that is responsible for the JSON data saving/parsing
+class ToDoListJSON:
+    # The function that validates the JSON structure before loading it
+    def validate_json(self, storage: list) -> bool:
+        if type(storage) is not list:
+            return False
+        for index, task_info in enumerate(storage, start=1):
+            if type(task_info) is not dict:
+                return False
+            if set(task_info.keys()) != {"ID", "Task", "Category", "Priority", "Deadline", "Weekday", "Done"}:
+                return False
+            if type(task_info["ID"]) is not int or type(task_info["Task"]) is not str or type(task_info['Category']) is not str or type(task_info['Priority']) is not str or type(task_info['Deadline']) is not str or type(task_info['Weekday']) is not str or type(task_info["Done"]) is not str:
+                return False
+            if task_info["ID"] != index:
+                return False
+        return True
+    # The function that reads the data from the file and loads it into the program
+    def read_file(self):
+        try:
+            with open("to_do_list.json", encoding="utf-8") as f:
+                storage = json.load(f)
+                if self.validate_json(storage):
+                    for task_info in storage:
+                        task_info["Deadline"] = datetime.fromisoformat(task_info["Deadline"])
+                    return storage
+                return []
+        except FileNotFoundError:
+            return []
+        except OSError as e:
+            print(f"\n{e}\n")
+            return []
+        except json.JSONDecodeError as e:
+            print(f"\n{e}\nIt seems that the file contains corrupted JSON data.\nThis could happen if the creator of this program has updated the structure.\nTherefore the to-do list will be reset.\nThank you for your understanding.\n")
+            return []
+    # The function that retrieves the data from the program and loads it into the file
+    def write_file(self, storage: list):
+        try:
+            with open("to_do_list.json", "w", encoding="utf-8") as f:
+                json.dump(storage, f, ensure_ascii=False, sort_keys=True, default=datetime.isoformat, indent=4)
+        except OSError as e:
+            print(f'\n{e}\n')
+ToDoListCLI().run_program()
