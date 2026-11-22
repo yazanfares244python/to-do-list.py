@@ -1,11 +1,15 @@
-What is the project about?
+What is this project about?
 
-This project is about using a digital to-do list where you can add, view, delete, edit, and manage tasks, etc.
+It's a CLI-based To-Do List application built with Python and Object-Oriented Programming (OOP). It allows users to manage their tasks by organizing them according to categories, priorities, deadlines, and completion status.
 
-How to use it / set it up?
+How to use it or set it up?
 
-Run it in a Python script
+When you start the program, you'll be presented with 15 menu options that allow you to add, view, edit, delete, filter, and manage tasks. Your data will automatically be loaded from and saved to to_do_list.json using JSON.
 
-What are the features of the project?
+To run the program, execute the Python file using:
 
-It uses menu options so the user can choose whatever they want to do (add, view, delete, edit, mark as done, etc.), uses a clean exit method, saves to-do list data by using JSON, checks if tasks exist before doing specific operations, and includes realistic features like task categories, priorities, due dates, due times, overdue tasks, today's tasks, future tasks, pending tasks, and completed tasks
+python to_do_list.py
+
+What are the features of this project?
+
+The features of this project include using OOP by separating 3 classes according to their responsibilities, saving and loading task data through JSON, adding and editing tasks with categories, priorities, and deadlines, marking tasks as complete or pending, deleting individual tasks or clearing the entire list, filtering tasks by category and priority, displaying pending and completed tasks, organizing tasks according to their deadlines (due today, overdue, and future), automatically determining weekdays from deadlines, and validating user inputs and stored JSON data.
