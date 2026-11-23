@@ -309,6 +309,9 @@ class ToDoListJSON:
         except json.JSONDecodeError as e:
             print(f"\n{e}\nIt seems that the file contains corrupted JSON data.\nThis could happen if the creator of this program has updated the structure.\nTherefore the to-do list will be reset.\nThank you for your understanding.\n")
             return []
+        except ValueError as e:
+            print(f"\n{e}\n")
+            return []
     # The function that retrieves the data from the program and loads it into the file
     def write_file(self, storage: list):
         try:
